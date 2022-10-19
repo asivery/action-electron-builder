@@ -72,6 +72,7 @@ const runAction = () => {
 	const useVueCli = getInput("use_vue_cli") === "true";
 	const args = getInput("args") || "";
 	const maxAttempts = Number(getInput("max_attempts") || "1");
+	const targetsToBuild = (getInput(`build_targets_${platform}`) || platform).split(",").map(e => e.trim());
 
 	// TODO: Deprecated option, remove in v2.0. `electron-builder` always requires a `package.json` in
 	// the same directory as the Electron app, so the `package_root` option should be used instead
@@ -125,23 +126,26 @@ const runAction = () => {
 		}
 	}
 
-	log(`Building${release ? " and releasing" : ""} the Electron app…`);
-	const cmd = useVueCli ? "vue-cli-service electron:build" : "electron-builder";
-	for (let i = 0; i < maxAttempts; i += 1) {
-		try {
-			run(
-				`${useNpm ? "npx --no-install" : "yarn run"} ${cmd} --${platform} ${
-					release ? "--publish always" : ""
-				} ${args}`,
-				appRoot,
-			);
-			break;
-		} catch (err) {
-			if (i < maxAttempts - 1) {
-				log(`Attempt ${i + 1} failed:`);
-				log(err);
-			} else {
-				throw err;
+	for (let targetPlatform of targetsToBuild){
+		log(`Building${release ? " and releasing" : ""} the Electron app for ${targetPlatform}…`);
+		const architectures = (getInput(`architectures_${targetPlatform}`) || "").split(",").map(e => `--${e.trim()}`).join(" ");
+		const cmd = useVueCli ? "vue-cli-service electron:build" : "electron-builder";
+		for (let i = 0; i < maxAttempts; i += 1) {
+			try {
+				run(
+					`${useNpm ? "npx --no-install" : "yarn run"} ${cmd} --${targetPlatform} ${
+						release ? "--publish always" : ""
+					} ${architectures} ${args}`,
+					appRoot,
+				);
+				break;
+			} catch (err) {
+				if (i < maxAttempts - 1) {
+					log(`Attempt ${i + 1} failed:`);
+					log(err);
+				} else {
+					throw err;
+				}
 			}
 		}
 	}

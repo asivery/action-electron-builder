@@ -46,6 +46,27 @@ inputs:
     description: Maximum number of attempts for completing the build and release step
     required: false
     default: "1"
+  build_targets_windows:
+    description: Comma-separated list of targets to build when running on a Windows worker
+    required: false
+  build_targets_linux:
+    description: Comma-separated list of targets to build when running on a Linux worker
+    required: false
+  build_targets_macos:
+    description: Comma-separated list of targets to build when running on a MacOS worker
+    required: false
+  architectures_windows:
+    description: Comma-separated list of architectures to build for Windows
+    required: false
+    default: "x64"
+  architectures_linux:
+    description: Comma-separated list of architectures to build for Linux
+    required: false
+    default: "x64"
+  architectures_macos:
+    description: Comma-separated list of architectures to build for MacOS
+    required: false
+    default: "x64,arm64"
 
   # Deprecated
   app_root:
